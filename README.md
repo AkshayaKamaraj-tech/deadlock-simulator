@@ -35,6 +35,7 @@ SQLite is used for the local simulator. Vercel Functions use temporary serverles
 ## Modules
 
 - Process and resource management
+- User-created process and resource scenarios with editable Banker’s maximum claims
 - Resource allocation graph builder
 - Work/Finish deadlock detection
 - Victim, all-process, and stepwise recovery with what-if previews

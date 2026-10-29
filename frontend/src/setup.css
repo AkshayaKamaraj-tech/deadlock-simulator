@@ -1,0 +1,26 @@
+.setup-shell{min-height:100vh;background:#f5f7f8}
+.setup-top{height:70px;background:#222d30;display:flex;align-items:center;justify-content:space-between;padding:0 max(calc((100vw - 1120px)/2),28px);color:#eef3f1}
+.setup-top .brand{padding:0}
+.setup-top .mode-pill{background:#2d3c3e;border-color:#3a4a4c;color:#a8c2b9}
+.setup-content{max-width:900px;margin:0 auto;padding:76px 28px}
+.setup-content h1{font:700 31px Manrope,sans-serif;letter-spacing:-1px;color:#20292c;margin:10px 0 8px}
+.setup-lead{font-size:13px;line-height:1.7;color:#849092;max-width:620px;margin:0 0 27px}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.setup-card{padding:19px}
+.setup-card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.setup-card-head strong,.setup-card-head span{display:block}
+.setup-card-head strong{font:700 13px Manrope,sans-serif;color:#354042}
+.setup-card-head span{font-size:10px;color:#98a3a1;margin-top:3px}
+.setup-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:end}
+.setup-form label{display:grid;gap:6px;color:#63716d;font-size:10px;font-weight:600}
+.setup-form input{height:37px;min-width:0;outline:none;border:1px solid #e1e8e5;border-radius:5px;background:#fff;padding:0 10px;color:#4d5a57;font-size:11px}
+.setup-form input:focus{border-color:#6fa39b;box-shadow:0 0 0 3px #6fa39b20}
+.resource-setup-form{grid-template-columns:minmax(0,1fr) 100px auto}
+.setup-list{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:14px;min-height:26px;font-size:10px}
+.setup-chip{display:inline-flex;align-items:center;gap:8px;background:#eef5f3;color:#57817a;padding:5px 8px;border-radius:5px;font:10px 'DM Mono',monospace}
+.setup-chip b{font-weight:600;color:#84928f}
+.setup-footer{display:flex;align-items:center;justify-content:space-between;margin-top:17px;padding:14px 2px;border-top:1px solid #e4eae8;color:#879390;font-size:11px}
+.setup-example{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#718a82;font-size:10px;padding:8px 2px}
+.setup-example:hover{color:#397f7d}
+.sidebar nav button:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:700px){.setup-top{padding:0 16px}.setup-content{padding:46px 16px}.setup-content h1{font-size:26px}.setup-grid{grid-template-columns:1fr}.resource-setup-form{grid-template-columns:minmax(0,1fr) 90px}.resource-setup-form .btn{grid-column:1/-1;justify-content:center}}

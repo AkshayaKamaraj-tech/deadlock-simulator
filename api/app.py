@@ -1,7 +1,6 @@
 import json
 import os
 import sqlite3
-import uuid
 from contextlib import closing
 from datetime import datetime, timezone
 
@@ -34,19 +33,11 @@ def init_db():
 
 def initial_state():
     return {
-        "processes": [
-            {"id": "P1", "name": "P1", "status": "waiting"},
-            {"id": "P2", "name": "P2", "status": "waiting"},
-            {"id": "P3", "name": "P3", "status": "running"},
-        ],
-        "resources": [
-            {"id": "R1", "name": "R1", "total": 1, "available": 0},
-            {"id": "R2", "name": "R2", "total": 1, "available": 0},
-            {"id": "R3", "name": "R3", "total": 1, "available": 1},
-        ],
-        "allocations": {"P1": {"R1": 1}, "P2": {"R2": 1}, "P3": {}},
-        "requests": {"P1": {"R2": 1}, "P2": {"R1": 1}, "P3": {}},
-        "maximum": {"P1": {"R1": 1, "R2": 1, "R3": 0}, "P2": {"R1": 1, "R2": 1, "R3": 0}, "P3": {"R1": 0, "R2": 0, "R3": 1}},
+        "processes": [],
+        "resources": [],
+        "allocations": {},
+        "requests": {},
+        "maximum": {},
     }
 
 
@@ -111,7 +102,7 @@ def detect(state):
 def bankers(state):
     ps, rs, allocation, _ = matrices(state)
     work = {r["id"]: r["available"] for r in rs}
-    need = {p["id"]: {r["id"]: max(0, state["maximum"].get(p["id"], {}).get(r["id"], 0) - allocation[p["id"]][r["id"]]) for r in rs} for p in ps}
+    need = {p["id"]: {r["id"]: max(0, (state["maximum"].get(p["id"], {}).get(r["id"]) or 0) - allocation[p["id"]][r["id"]]) for r in rs} for p in ps}
     finish = {p["id"]: False for p in ps}
     sequence = []
     while True:
@@ -173,7 +164,9 @@ def replace_state():
 @app.post("/api/processes")
 def add_process():
     payload = request.get_json(silent=True) or {}
-    name = str(payload.get("name", "")).strip() or f"P{uuid.uuid4().hex[:4]}"
+    name = str(payload.get("name", "")).strip()
+    if not name:
+        return error("Enter a process ID.")
     state = load_state()
     if any(p["id"] == name for p in state["processes"]):
         return error("A process with that ID already exists.")
@@ -184,7 +177,6 @@ def add_process():
     for r in state["resources"]:
         state["allocations"][name][r["id"]] = 0
         state["requests"][name][r["id"]] = 0
-        state["maximum"][name][r["id"]] = r["total"]
     save_state(state, ("process", f"Created process {name}", {"process": name}))
     return jsonify({"state": state}), 201
 
@@ -192,7 +184,9 @@ def add_process():
 @app.post("/api/resources")
 def add_resource():
     payload = request.get_json(silent=True) or {}
-    name = str(payload.get("name", "")).strip() or f"R{uuid.uuid4().hex[:4]}"
+    name = str(payload.get("name", "")).strip()
+    if not name:
+        return error("Enter a resource ID.")
     try:
         total = int(payload.get("total", 1))
         if total < 1 or total > 99:
@@ -204,10 +198,35 @@ def add_resource():
         return error("A resource with that ID already exists.")
     state["resources"].append({"id": name, "name": name, "total": total, "available": total})
     for p in state["processes"]:
-        for key in ("allocations", "requests", "maximum"):
-            state[key].setdefault(p["id"], {})[name] = total if key == "maximum" else 0
+        for key in ("allocations", "requests"):
+            state[key].setdefault(p["id"], {})[name] = 0
     save_state(state, ("resource", f"Added {name} with {total} instance{'s' if total != 1 else ''}", {"resource": name, "total": total}))
     return jsonify({"state": state}), 201
+
+
+@app.put("/api/maximum")
+def set_maximum():
+    payload = request.get_json(silent=True) or {}
+    pid = str(payload.get("process", ""))
+    maximum = payload.get("maximum")
+    state = load_state()
+    process = next((p for p in state["processes"] if p["id"] == pid), None)
+    if not process or not isinstance(maximum, dict):
+        return error("Choose a process and provide its maximum claims.")
+    try:
+        for resource in state["resources"]:
+            rid = resource["id"]
+            if rid not in maximum:
+                return error(f"Enter a maximum claim for {rid}.")
+            units = int(maximum.get(rid, 0))
+            allocated = int(state["allocations"].get(pid, {}).get(rid, 0))
+            if units < allocated or units > int(resource["total"]):
+                return error(f"Maximum claim for {rid} must be at least its allocation and no more than its total instances.")
+            state["maximum"].setdefault(pid, {})[rid] = units
+    except (TypeError, ValueError):
+        return error("Maximum claims must be whole numbers.")
+    save_state(state, ("maximum", f"Updated maximum claims for {pid}", {"process": pid, "maximum": state["maximum"][pid]}))
+    return get_state()
 
 
 @app.post("/api/allocate")
