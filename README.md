@@ -28,7 +28,7 @@ Open the local Vite URL shown in the terminal. Vite proxies `/api` requests to F
 
 ## Deploy on Vercel
 
-Import the Git repository into Vercel and set the project root to `vs`. The included build command creates the React client, and Vercel serves its files from `public/` while the Flask app handles API requests. No build output needs to be committed.
+Import the Git repository into Vercel with the repository root (`./`) selected. Vercel builds the `frontend` and Flask `app` services from the included `vercel.json`; `/api/*` requests go to Flask and all other paths go to the React client.
 
 SQLite is used for the local simulator. Vercel Functions use temporary serverless storage, so use a hosted database if you need history and scenario changes to persist across deployments or function instances.
 
