@@ -2,9 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "app": {
-      "root": ".",
+      "root": "api",
       "framework": "flask",
-      "entrypoint": "api.app:app"
+      "entrypoint": "app.py"
     },
     "frontend": {
       "root": "frontend",
